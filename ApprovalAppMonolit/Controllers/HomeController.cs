@@ -4,6 +4,7 @@ using ApprovalAppMonolit.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ApprovalAppMonolit.Controllers
 {
@@ -19,15 +20,35 @@ namespace ApprovalAppMonolit.Controllers
             _ticketsService = ticketsService;
         }
         [Authorize]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            Ticket ticket = await _ticketsService.GetTicketByIdAsync(1);
             return View();
         }
 
-        public IActionResult Privacy()
+        public async Task<ActionResult> GetIncoming(long approvingId)
         {
-            return View();
+            List<TicketApproval> tickets = await _ticketsService.GetActiveIncomingTicketsByIdApproving(approvingId);
+
+            List<TicketViewModel> response = tickets
+                .Select(t => new TicketViewModel(t.Ticket?.Id ?? -1, t.Ticket?.Title, t.Ticket?.Description,
+                 t.Ticket?.CreateDate.ToString("d") ?? "", t.Deadline?.ToString("d"), t.Ticket?.AuthorPerson?.FullName,
+                 t.ApprovingPerson?.FullName, t.Status))
+                .ToList();
+
+            return Json(response);
+        }
+
+        public async Task<ActionResult> GetOutgoing(long idAuthor)
+        {
+            List<Ticket> tickets = await _ticketsService.GetTicketsByIdAuthorAsync(idAuthor);
+
+            List<TicketViewModel> response = tickets
+                .Select(t => new TicketViewModel(t.Id, t.Title, t.Description,
+                 t.CreateDate.ToString("d"), t.TicketApprovals?.LastOrDefault()?.Deadline?.ToString("d"),
+                 t.AuthorPerson?.FullName, "", t.TicketApprovals?.LastOrDefault()?.Status))
+                .ToList();
+
+            return Json(response);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

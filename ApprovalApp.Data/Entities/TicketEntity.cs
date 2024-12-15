@@ -13,7 +13,7 @@ namespace ApprovalApp.Data.Entities
 
         public string? Description { get; set; }
 
-        public DateTime CreateDate { get; set; } = DateTime.Now;
+        public DateTime CreateDate { get; set; }
 
         public long IdAuthor { get; set; }
 

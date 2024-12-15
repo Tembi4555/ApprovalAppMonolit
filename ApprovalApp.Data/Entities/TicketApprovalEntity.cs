@@ -18,7 +18,8 @@ namespace ApprovalApp.Data.Entities
         public string? Status { get; set; }
         public int Iteration { get; set; }
         public int NumberQueue { get; set; }
-        public DateTime ModifiedDate { get; set; } = DateTime.Now;
+        public DateTime ModifiedDate { get; set; }
+        public DateTime? Deadline {  get; set; }
         public string? Comment { get; set; }
 
         public TicketApproval Mapping()
@@ -27,7 +28,7 @@ namespace ApprovalApp.Data.Entities
             {
                 TicketApproval ta = TicketApproval.Create(id: this.Id, ticketId: this.TicketId,
                 approvingPersonId: this.ApprovingPersonId, status: this.Status, iteration: this.Iteration,
-                numberQueue: this.NumberQueue, comment: this.Comment,
+                numberQueue: this.NumberQueue, comment: this.Comment, deadline: this.Deadline,
                 approvingPerson: this?.Person?.Mapping(), ticket: this?.Ticket?.Mapping()).TicketApproval;
                 return ta;
             }

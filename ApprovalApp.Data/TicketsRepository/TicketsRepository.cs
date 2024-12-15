@@ -36,7 +36,8 @@ namespace ApprovalApp.Data.TicketsRepository
                 Id = ticket.Id,
                 IdAuthor = ticket.IdAuthor,
                 Title = ticket.Title,
-                Description = ticket.Description
+                Description = ticket.Description,
+                CreateDate = DateTime.Now,
             };
 
             foreach (var author in approvingInQueue)
@@ -47,7 +48,8 @@ namespace ApprovalApp.Data.TicketsRepository
                     ApprovingPersonId = author.Key,
                     Status = "Новая",
                     Iteration = 1,
-                    NumberQueue = author.Value
+                    NumberQueue = author.Value,
+                    ModifiedDate = DateTime.Now
                 };
 
                 te.TicketApprovalEntities.Add(tae);
@@ -117,7 +119,8 @@ namespace ApprovalApp.Data.TicketsRepository
             {
                 ticketApprovals.Add(TicketApproval
                     .Create(id: ta.Id, ticketId:ta.TicketId, approvingPersonId: ta.ApprovingPersonId,
-                        status: ta.Status, ta.Iteration, ta.NumberQueue, ta.Comment).TicketApproval);
+                        status: ta.Status, iteration: ta.Iteration, numberQueue: ta.NumberQueue, 
+                        comment: ta.Comment, deadline: ta.Deadline).TicketApproval);
             }
 
             Ticket ticket = Ticket.Create(id: ticketEntity.Id, title: ticketEntity.Title, description: ticketEntity.Description,

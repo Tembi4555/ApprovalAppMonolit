@@ -1,5 +1,10 @@
-﻿@{
+﻿@model List<TicketViewModel>
+@{
     ViewData["Title"] = "Home Page";
+    long.TryParse(Context.User.FindFirst("PersonId")?.Value, out long result);
+    long personId = result;
+    string dataUrl = "http://localhost:5021" + Url.Action("GetIncoming", "Home", new { approvingId = personId });
+    var a = 1;
 }
 <div class="container">
     <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -16,10 +21,31 @@
     <hr />
     <div class="tab-content">
         <div class="tab-pane active" id="incoming">
-            ВХОДЯЩИЕ
+            <table 
+                id="incoming-table">
+                <thead>
+                    <tr>
+                        <th data-field="id">№</th>
+                        <th data-field="title">Тема</th>
+                        <th data-field="description">Описание</th>
+                        <th data-field="deadline">Срок</th>
+                        <th data-field="createDate">Дата создания</th>
+                    </tr>
+                </thead>
+            </table>
         </div>
         <div class="tab-pane" id="outgoing">
-            ИСХОДЯЩИЕ
+            <table id="outgoing-table">
+                <thead>
+                    <tr>
+                        <th data-field="id">№</th>
+                        <th data-field="title">Тема</th>
+                        <th data-field="description">Описание</th>
+                        <th data-field="deadline">Срок</th>
+                        <th data-field="createDate">Дата создания</th>
+                    </tr>
+                </thead>
+            </table>
         </div>
     
     </div>
@@ -27,4 +53,61 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+
+        var $incomingTable = $('#incoming-table')
+        var $outgoingTable = null
+        
+         $(function () {
+            createIncomingTable()
+
+            $("#outgoing-tab").click(function () {
+                if (!$outgoingTable){
+                    createOutgoingTable();
+                }
+            });
+
+            $("#incoming-tab").click(function () {
+                
+            });
+            
+        })
+
+        function createIncomingTable(){
+            $.ajax({
+                url: '@Url.Action("GetIncoming", "Home")',
+                method: 'post',
+                dataType: 'html',
+                data: { approvingId: @personId },
+                success: function (data) {
+                    var res = JSON.parse(data)
+                    $incomingTable.bootstrapTable({ data: res });
+                }
+            });
+        }
+
+        function updateIncomingTable()
+        {
+
+        }
+
+        function createOutgoingTable() {
+            $outgoingTable = $('#outgoing-table')
+            $.ajax({
+                url: '@Url.Action("GetOutgoing", "Home")',
+                method: 'post',
+                dataType: 'html',
+                data: { idAuthor: @personId },
+                success: function (data) {
+                    var res = JSON.parse(data)
+                    $outgoingTable.bootstrapTable({ data: res });
+                }
+            });
+        }
+
+        function updateOutgoingTable() {
+
+        }
+
+    </script>
 }
