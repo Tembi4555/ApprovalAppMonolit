@@ -1,0 +1,23 @@
+﻿@using ApprovalApp.Domain.Models
+@model List<User>
+
+@using(Html.BeginForm("Login", "Login", FormMethod.Post))
+{
+    <div class="container pt-5">
+        <div class="mb-3 row">
+            <label for="login" class="col-sm-2 col-form-label">Выберите пользователя</label>
+            <div class="col-sm-10">
+                @Html.DropDownList("login", new SelectList(Model.Select(u => u.UserName)), new { @class = "form-control" })
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <label for="password" class="col-sm-2 col-form-label">Пароль</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" name="password" id="password">
+            </div>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary mb-3">Войти</button>
+        </div>
+    </div>
+}

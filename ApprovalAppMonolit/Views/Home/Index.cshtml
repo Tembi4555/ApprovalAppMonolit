@@ -1,0 +1,30 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="container">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" aria-current="page" id="incoming-tab" data-bs-toggle="tab" href="#incoming" role="tab" aria-controls="incoming" aria-selected="true">Входящие задачи</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="outgoing-tab" data-bs-toggle="tab" href="#outgoing" role="tab" aria-controls="outgoing" aria-selected="false">Исходящие задачи</a>
+        </li>
+        <li class="nav-item">
+            <button class="btn btn-primary" id="btn-create-task" type="button" aria-selected="false">+ Создать задачу</button>
+        </li>
+    </ul>
+    <hr />
+    <div class="tab-content">
+        <div class="tab-pane active" id="incoming">
+            ВХОДЯЩИЕ
+        </div>
+        <div class="tab-pane" id="outgoing">
+            ИСХОДЯЩИЕ
+        </div>
+    
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
