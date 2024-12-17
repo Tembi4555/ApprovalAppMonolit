@@ -1,0 +1,158 @@
+﻿@{
+    ViewData["Title"] = "Новая задача";
+
+    var peopleJson = ViewBag.People as string;
+    long.TryParse(Context.User.FindFirst("PersonId")?.Value, out long res);
+    long personId = res;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="text-center mb-4">Новая задача</h2>
+            <form id="taskForm">
+                <div class="mb-3">
+                    <label for="Title" class="form-label">Название задачи</label>
+                    <input type="text" class="form-control" id="Title" name="Title" placeholder="Введите название задачи" required>
+                    <div class="error" id="taskTitleError"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="Description" class="form-label">Описание</label>
+                    <textarea class="form-control" id="Description" name="Description" rows="4" placeholder="Введите описание задачи"></textarea>
+                    <div class="error" id="DescriptionError"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="taskDeadline" class="form-label">Срок выполнения</label>
+                    <input type="date" class="form-control" id="taskDeadline" name="taskDeadline" required>
+                    <div class="error" id="taskDeadlineError"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Согласующие</label>
+                    <div id="approvers">
+                        <div class="d-flex align-items-center autocomplete-input">
+                            <select class="form-select approver-select" name="approvers_select">
+                                <option value="">Выберите согласующего</option>
+                            </select>
+                            <input type="hidden" name="approver_ids" class="approver-id">
+                            <button type="button" class="btn btn-outline-secondary ms-2 btn-add" title="Добавить согласующего">+</button>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="IdAuthor" value="@personId">
+
+                <button type="submit" class="btn btn-primary w-100">Добавить задачу</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="~/lib/select2/select2.min.css" rel="stylesheet" />
+    <style>
+        /* Специальные стили для этой страницы */
+        .autocomplete-input {
+            margin-bottom: 10px;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.875em;
+        }
+    </style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <!-- Подключаем Select2 скрипт -->
+    <script src="~/lib/select2/select2.min.js"></script>
+    <script>
+
+        $(document).ready(function () {
+
+            // Список согласующих с их ID
+            const approvers = JSON.parse('@Html.Raw(peopleJson)');
+
+            // Функция для инициализации Select2
+            function initSelect2(select) {
+                $(select).select2({
+                    placeholder: "Выберите согласующего",
+                    allowClear: true,
+                    data: approvers.map(a => ({
+                        id: a.Id,
+                        text: a.FullName
+                    }))
+                });
+
+                // Обработка изменения значения
+                $(select).on("select2:select", function (e) {
+                    const selectedApprover = approvers.find(a => a.Id == e.params.data.id);
+                    $(this).next(".approver-id").val(selectedApprover.Id); // Устанавливаем ID в скрытое поле
+                });
+            }
+
+            // Инициализация для первого поля
+            initSelect2($(".approver-select").first());
+
+            // Добавление нового поля
+            $(document).on("click", ".btn-add", function () {
+                const newField = `
+                  <div class="d-flex align-items-center autocomplete-input">
+                    <select class="form-select approver-select" name="approvers_select">
+                      <option value="">Выберите согласующего</option>
+                    </select>
+                    <input type="hidden" name="approver_ids" class="approver-id">
+                    <button type="button" class="btn btn-outline-danger ms-2 btn-remove" title="Удалить поле">-</button>
+                  </div>
+                `;
+                $("#approvers").append(newField);
+
+                // Инициализация Select2 для нового поля
+                initSelect2($("#approvers .approver-select").last());
+            });
+
+            // Удаление поля
+            $(document).on("click", ".btn-remove", function () {
+                $(this).closest(".autocomplete-input").remove();
+            });
+
+            // Валидация формы
+            $("#taskForm").submit(function (e) {
+                e.preventDefault();
+
+                // Очищаем старые ошибки
+                $(".error").text("");
+                let isValid = true;
+
+                // Проверка на обязательность полей
+                if ($("#Title").val() === "") {
+                    $("#taskTitleError").text("Название задачи обязательно.");
+                    isValid = false;
+                }
+                if ($("#Description").val() === "") {
+                    $("#taskDescriptionError").text("Описание обязательно.");
+                    isValid = false;
+                }
+                if ($("#taskDeadline").val() === "") {
+                    $("#taskDeadlineError").text("Срок выполнения обязателен.");
+                    isValid = false;
+                }
+
+                var formData = $("#taskForm").serialize();
+
+                // Если все поля валидны, отправляем форму
+                if (isValid) {
+                    $.ajax({
+                        url: '@Url.Action("Create", "Home")',
+                        method: 'post',
+                        dataType: 'html',
+                        data: formData,
+                        success: function (response) {
+                            window.location.href = '@Url.Action("Index", "Home")';
+                        }
+                    });
+                }
+            });
+        });
+        
+    </script>
+}

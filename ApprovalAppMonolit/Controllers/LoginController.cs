@@ -34,13 +34,14 @@ namespace ApprovalAppMonolit.Controllers
             }
 
             User user = await _authService.GetUserAsync(login: login, password: password);
-            Person person = await _personsService.GetPersonByIdAsync(user.Id);
-            user.AddFullName(person?.FullName);
 
             if(user is null)
             {
                 return Unauthorized();
             }
+
+            Person person = await _personsService.GetPersonByIdAsync(user.Id);
+            user.AddFullName(person?.FullName);
 
             List<Claim> claims = new List<Claim>
             {
@@ -53,7 +54,7 @@ namespace ApprovalAppMonolit.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
 
-            return Redirect(returnUrl ?? "~/Home/Index");
+            return Json(Response.StatusCode = 200);
         }
     }
 }

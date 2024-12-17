@@ -38,7 +38,8 @@ namespace ApprovalApp.Domain.Models
         public List<TicketApproval>? TicketApprovals { get; }
 
         public static (Ticket Ticket, string? Error) Create (long id, string? title, string? description, 
-            long idAuthor, List<TicketApproval>? ticketApprovals = null, Person? authorPerson = null)
+            long idAuthor, List<TicketApproval>? ticketApprovals = null, Person? authorPerson = null, 
+            DateTime? createDate = null)
         {
             string error = string.Empty;
 
@@ -63,12 +64,13 @@ namespace ApprovalApp.Domain.Models
                     error = "В заявке не указан автор.";
             }
 
-            if(ticketApprovals == null)
+            if(ticketApprovals is null)
                 ticketApprovals = new List<TicketApproval>();
 
-            DateTime createDate = DateTime.Now;
+            if(createDate is null)
+                createDate = DateTime.Now;
 
-            Ticket ticket = new Ticket(id, title, description, createDate, idAuthor, ticketApprovals, authorPerson);
+            Ticket ticket = new Ticket(id, title, description, (DateTime)createDate, idAuthor, ticketApprovals, authorPerson);
 
             return (ticket,  error);
         }

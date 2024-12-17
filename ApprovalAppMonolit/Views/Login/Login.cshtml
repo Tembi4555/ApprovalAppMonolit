@@ -1,23 +1,111 @@
 ﻿@using ApprovalApp.Domain.Models
 @model List<User>
 
-@using(Html.BeginForm("Login", "Login", FormMethod.Post))
+<style>
+    .error-message {
+        color: red;
+        margin-top: 10px;
+        display: none; /* Изначально скрываем сообщение */
+    }
+</style>
+
+@using (Html.BeginForm("Login", "Login", FormMethod.Post, new { id = "loginForm" }))
 {
-    <div class="container pt-5">
-        <div class="mb-3 row">
-            <label for="login" class="col-sm-2 col-form-label">Выберите пользователя</label>
-            <div class="col-sm-10">
+    <div class="mx-auto" style="max-width: 650px;">
+        <div class="mb-3 row align-items-start">
+            <label for="login" class="col-sm-3 col-form-label pt-0">Выберите пользователя</label>
+            <div class="col-sm-9">
                 @Html.DropDownList("login", new SelectList(Model.Select(u => u.UserName)), new { @class = "form-control" })
             </div>
         </div>
         <div class="mb-3 row">
-            <label for="password" class="col-sm-2 col-form-label">Пароль</label>
-            <div class="col-sm-10">
+            <label for="password" class="col-sm-3 col-form-label">Пароль</label>
+            <div class="col-sm-9">
                 <input type="password" class="form-control" name="password" id="password">
             </div>
         </div>
+        <div class="error-message" id="errorMessage">Логин или пароль неверные.</div>
         <div class="col-auto">
             <button type="submit" class="btn btn-primary mb-3">Войти</button>
         </div>
     </div>
+}
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).ready(function () {
+          $("#loginForm").on("submit", function (e) {
+            e.preventDefault(); // Отмена стандартного поведения формы
+            let isValid = true;
+
+            // Проверка логина
+            const username = $("#login").val().trim();
+            if (username === "") {
+              $("#login").addClass("is-invalid");
+              isValid = false;
+            } else {
+              $("#login").removeClass("is-invalid");
+            }
+
+            // Проверка пароля
+            const password = $("#password").val().trim();
+            if (password === "") {
+              $("#password").addClass("is-invalid");
+              isValid = false;
+            } else {
+              $("#password").removeClass("is-invalid");
+            }
+
+            const formData = {
+                login: username,
+                password: password
+            };
+
+            // Если форма валидна
+            if (isValid) {
+               $.ajax({
+                   url: '@Url.Action("Login", "Login")',
+                   method: 'post',
+                   dataType: 'html',
+                   data: formData,
+                   success: function (response) {
+                       if (response === "200") {
+                           window.location.href = '@Url.Action("Index", "Home")';
+                       }
+                       else{
+                           // Показываем сообщение об ошибке
+                           $("#errorMessage").fadeIn(); // Отображаем сообщение с анимацией
+                           $("#username, #password").addClass("is-invalid"); // Подсветка ошибок
+                       }
+                       
+                   },
+                   error: function (jqxhr, status, errorMsg) {
+                       if (errorMsg === 'Unauthorized')
+                       {
+                            // Показываем сообщение об ошибке
+                            $("#errorMessage").fadeIn(); // Отображаем сообщение с анимацией
+                            $("#username, #password").addClass("is-invalid"); // Подсветка ошибок
+                       }
+                       else
+                            alert("Произошла ошибка при отправке запроса");
+                   }
+               });
+            }
+          });
+
+          // Удаление ошибок при вводе
+          $("#login, #password").on("input", function () {
+            $(this).removeClass("is-invalid");
+          });
+
+          $("#username, #password").on("input", function () {
+              $("#errorMessage").fadeOut(); // Прячем сообщение об ошибке
+              $(this).removeClass("is-invalid"); // Убираем подсветку ошибок
+          });
+        });
+
+    </script>
 }

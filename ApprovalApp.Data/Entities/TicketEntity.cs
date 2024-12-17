@@ -26,7 +26,7 @@ namespace ApprovalApp.Data.Entities
         {
             
             Ticket ticket = Ticket.Create(id: this.Id, title: this.Title, description: this.Description, 
-                idAuthor: this.IdAuthor, authorPerson: this?.Person?.Mapping()).Ticket;
+                idAuthor: this.IdAuthor, authorPerson: this?.Person?.Mapping(), createDate: this.CreateDate).Ticket;
 
             return ticket;
         }

@@ -19,7 +19,7 @@ namespace ApprovalApp.Data.TicketsRepository
             _context = context;
         }
 
-        public async Task<long> CreateTicketAsync(Ticket ticket, Dictionary<long, int> approvingInQueue)
+        public async Task<long> CreateTicketAsync(Ticket ticket, Dictionary<long, int> approvingInQueue, DateTime? deadLine)
         {
             if (approvingInQueue.Count() == 0)
             {
@@ -49,7 +49,8 @@ namespace ApprovalApp.Data.TicketsRepository
                     Status = "Новая",
                     Iteration = 1,
                     NumberQueue = author.Value,
-                    ModifiedDate = DateTime.Now
+                    ModifiedDate = DateTime.Now,
+                    Deadline = deadLine
                 };
 
                 te.TicketApprovalEntities.Add(tae);
@@ -66,7 +67,7 @@ namespace ApprovalApp.Data.TicketsRepository
             List<TicketApprovalEntity> ticketsApprovalEntities = await _context.TicketsApprovals.AsNoTracking()
                 .Where(t => t.ApprovingPersonId == approvingId 
                     && (t.Status == "Новая" || t.Status == "На доработку"))
-                .Include(t => t.Ticket).ThenInclude(p => p.Person)
+                .Include(t => t.Ticket).ThenInclude(p => p!.Person)
                 .Include(p => p.Person)
                 .ToListAsync();
 

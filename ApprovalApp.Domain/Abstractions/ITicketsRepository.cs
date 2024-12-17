@@ -10,7 +10,7 @@ namespace ApprovalApp.Domain.Abstractions
         /// <summary>
         /// Создание заявки в БД.
         /// </summary>
-        Task<long> CreateTicketAsync(Ticket ticket, Dictionary<long, int> authorsInQueue);
+        Task<long> CreateTicketAsync(Ticket ticket, Dictionary<long, int> authorsInQueue, DateTime? deadLine);
 
         /// <summary>
         /// Получить задачу на согласование по id автора и id задачи.

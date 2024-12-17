@@ -29,7 +29,8 @@ namespace ApprovalApp.Data.Entities
                 TicketApproval ta = TicketApproval.Create(id: this.Id, ticketId: this.TicketId,
                 approvingPersonId: this.ApprovingPersonId, status: this.Status, iteration: this.Iteration,
                 numberQueue: this.NumberQueue, comment: this.Comment, deadline: this.Deadline,
-                approvingPerson: this?.Person?.Mapping(), ticket: this?.Ticket?.Mapping()).TicketApproval;
+                approvingPerson: this?.Person?.Mapping(), ticket: this?.Ticket?.Mapping(), 
+                updateDate: this.ModifiedDate).TicketApproval;
                 return ta;
             }
             catch (Exception ex)

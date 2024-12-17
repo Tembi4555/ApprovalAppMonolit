@@ -3,8 +3,6 @@
     ViewData["Title"] = "Home Page";
     long.TryParse(Context.User.FindFirst("PersonId")?.Value, out long result);
     long personId = result;
-    string dataUrl = "http://localhost:5021" + Url.Action("GetIncoming", "Home", new { approvingId = personId });
-    var a = 1;
 }
 <div class="container">
     <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -15,7 +13,7 @@
             <a class="nav-link" id="outgoing-tab" data-bs-toggle="tab" href="#outgoing" role="tab" aria-controls="outgoing" aria-selected="false">Исходящие задачи</a>
         </li>
         <li class="nav-item">
-            <button class="btn btn-primary" id="btn-create-task" type="button" aria-selected="false">+ Создать задачу</button>
+            <a class="btn btn-primary" id="btn-create-task" href="@Url.Action("Create","Home")" type="button" aria-selected="false">+ Создать задачу</a>
         </li>
     </ul>
     <hr />

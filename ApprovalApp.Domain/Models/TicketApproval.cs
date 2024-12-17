@@ -42,7 +42,8 @@
 
         public static(TicketApproval TicketApproval, string Error) Create (long id, long ticketId, 
             long approvingPersonId, string? status, int iteration, int numberQueue, string? comment,
-            DateTime? deadline, Person? approvingPerson = null, Ticket? ticket = null)
+            DateTime? deadline, Person? approvingPerson = null, Ticket? ticket = null, 
+            DateTime? updateDate = null)
         {
             string error = String.Empty;
             
@@ -68,8 +69,11 @@
                 error += " Требуется задать комментарий к статусу.";
             }
 
+            if(updateDate is null)
+                updateDate = DateTime.Now;
+
             TicketApproval ta = new TicketApproval(id, ticketId, approvingPersonId, status,
-                iteration, numberQueue, DateTime.Now, comment, deadline, approvingPerson, ticket);
+                iteration, numberQueue, (DateTime)updateDate, comment, deadline, approvingPerson, ticket);
 
             return (ta, error);
         }

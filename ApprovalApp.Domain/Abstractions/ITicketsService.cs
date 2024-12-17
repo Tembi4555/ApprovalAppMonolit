@@ -15,7 +15,7 @@ namespace ApprovalApp.Domain.Abstractions
         /// <summary>
         /// Создание заявки.
         /// </summary>
-        Task<long> CreateTicketAsync(Ticket ticket, Dictionary<long, int> approvingInQueue);
+        Task<long> CreateTicketAsync(Ticket ticket, Dictionary<long, int> approvingInQueue, DateTime? deadLine);
 
         /// <summary>
         /// Прекращение согласования заявки.

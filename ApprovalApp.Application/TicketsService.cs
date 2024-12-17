@@ -17,9 +17,9 @@ namespace ApprovalApp.Application
             _ticketsRepository = ticketsRepository;
         }
 
-        public async Task<long> CreateTicketAsync(Ticket ticket, Dictionary<long, int> approvingInQueue)
+        public async Task<long> CreateTicketAsync(Ticket ticket, Dictionary<long, int> approvingInQueue, DateTime? deadLine)
         {
-            long ticketId = await _ticketsRepository.CreateTicketAsync(ticket, approvingInQueue);
+            long ticketId = await _ticketsRepository.CreateTicketAsync(ticket, approvingInQueue, deadLine);
 
             return ticketId;
         }
