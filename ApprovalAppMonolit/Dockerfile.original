@@ -12,9 +12,6 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["ApprovalAppMonolit/ApprovalAppMonolit.csproj", "ApprovalAppMonolit/"]
-COPY ["ApprovalApp.Application/ApprovalApp.Application.csproj", "ApprovalApp.Application/"]
-COPY ["ApprovalApp.Data/ApprovalApp.Data.csproj", "ApprovalApp.Data/"]
-COPY ["ApprovalApp.Domain/ApprovalApp.Domain.csproj", "ApprovalApp.Domain/"]
 RUN dotnet restore "./ApprovalAppMonolit/ApprovalAppMonolit.csproj"
 COPY . .
 WORKDIR "/src/ApprovalAppMonolit"

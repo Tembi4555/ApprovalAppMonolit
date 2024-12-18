@@ -4,6 +4,7 @@ using ApprovalApp.Data.PersonsRepository;
 using ApprovalApp.Data.TicketsRepository;
 using ApprovalApp.Data.UsersRepositoty;
 using ApprovalApp.Domain.Abstractions;
+using ApprovalAppMonolit.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,6 +23,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options => options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Login/Login"));
 builder.Services.AddAuthorization();
 
+builder.Services.AddSignalR();
 
 builder.Services.AddScoped<IPersonsService, PersonsService>();
 builder.Services.AddScoped<IPersonsPerository, PersonsRepository>();
@@ -30,7 +32,11 @@ builder.Services.AddScoped<ITicketsService, TicketsService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
+builder.WebHost.UseUrls("http://*:80");
+
 var app = builder.Build();
+
+app.MapHub<AppHub>("/channel");
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

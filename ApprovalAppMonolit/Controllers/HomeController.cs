@@ -1,9 +1,11 @@
 using ApprovalApp.Domain.Abstractions;
 using ApprovalApp.Domain.Models;
 using ApprovalAppMonolit.Contracts;
+using ApprovalAppMonolit.Hubs;
 using ApprovalAppMonolit.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Linq;
@@ -17,13 +19,15 @@ namespace ApprovalAppMonolit.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly ITicketsService _ticketsService;
         private readonly IPersonsService _personsService;
+        private readonly IHubContext<AppHub> _hubContext;
 
-        public HomeController(ILogger<HomeController> logger, ITicketsService ticketsService, IPersonsService personsService)
+        public HomeController(ILogger<HomeController> logger, ITicketsService ticketsService, 
+            IPersonsService personsService, IHubContext<AppHub> hubContext)
         {
             _logger = logger;
             _ticketsService = ticketsService;
             _personsService = personsService;
-
+            _hubContext = hubContext;
         }
         [Authorize]
         public IActionResult Index()
@@ -79,6 +83,10 @@ namespace ApprovalAppMonolit.Controllers
             }
 
             long ticketId = await _ticketsService.CreateTicketAsync(ticket, approvingInQueue, taskDeadline);
+
+            string[] approversStr = approvers_select.Select(a => a.ToString()).ToArray();
+
+            await _hubContext.Clients.All.SendAsync("ReceiveMessage", approversStr, "¬ам поставлена нова€ задача дл€ согласовани€");
 
             return Redirect(Url.Action("Index","Home"));
         }
