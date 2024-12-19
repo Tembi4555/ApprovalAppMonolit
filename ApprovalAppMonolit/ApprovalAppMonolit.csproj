@@ -31,6 +31,7 @@
   <ItemGroup>
     <Folder Include="wwwroot\lib\toastify\" />
     <Folder Include="wwwroot\lib\microsoft-signalr\" />
+    <Folder Include="wwwroot\lib\fontawesome\" />
   </ItemGroup>
 
 </Project>

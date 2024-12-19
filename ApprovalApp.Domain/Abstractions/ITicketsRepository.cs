@@ -15,12 +15,12 @@ namespace ApprovalApp.Domain.Abstractions
         /// <summary>
         /// Получить задачу на согласование по id автора и id задачи.
         /// </summary>
-        Task<TicketApproval> GetTicketApprovalByIdTicketAndApproving(long idTicket, long idApproving);
+        Task<TicketApproval?> GetTicketApprovalByIdTicketAndApproving(long idTicket, long idApproving);
 
         /// <summary>
         /// Получение заявки по ID из БД.
         /// </summary>
-        Task<Ticket> GetTicketByIdAsync(long ticketId);
+        Task<Ticket?> GetTicketByIdAsync(long ticketId);
 
         /// <summary>
         /// Обновить заявку.
@@ -45,5 +45,13 @@ namespace ApprovalApp.Domain.Abstractions
         /// <param name="approvingId"></param>
         /// <returns></returns>
         Task<List<TicketApproval>> GetActiveIncomingTicketsByIdApproving(long approvingId);
+
+        /// <summary>
+        /// Получить задачу на согласование по идентификатору задачи и идентификатору согласующего
+        /// </summary>
+        /// <param name="idTicket"></param>
+        /// <param name="idApproving"></param>
+        /// <returns></returns>
+        Task<TicketApproval> GetTicketApprovalAsync(long idTicket, long idApproving);
     }
 }

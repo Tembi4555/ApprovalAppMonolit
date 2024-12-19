@@ -59,7 +59,7 @@ namespace ApprovalApp.Application
 
         public async Task<Ticket> GetTicketByIdAsync(long ticketId)
         {
-            Ticket ticket = await _ticketsRepository.GetTicketByIdAsync(ticketId);
+            Ticket? ticket = await _ticketsRepository.GetTicketByIdAsync(ticketId);
 
             return ticket;
         }
@@ -75,13 +75,13 @@ namespace ApprovalApp.Application
             return "ok";
         }
 
-        public async Task<string> ApprovingTicketTask(long idTicket, long idApproving, string status, string comment)
+        public async Task<TicketApproval> ApprovingTicketTask(long idTicket, long idApproving, string status, string comment)
         {
             TicketApproval ta = await _ticketsRepository.GetTicketApprovalByIdTicketAndApproving(idTicket, idApproving);
             
             if(ta == null || ta.Status == "Прекращено" || ta.Status == "На доработку" || ta.Status == "Согласовано")
             {
-                return $"Не найдена активная задача {idTicket}, для автора {idApproving}";
+                return null;
             }
 
             ta.Update(status, comment);
@@ -90,9 +90,9 @@ namespace ApprovalApp.Application
 
             if (statusOperation <= 0)
             {
-                return "Произошла ошибка при сохранении данных.";
+                return null;
             }
-            return "ok";
+            return ta;
 
         }
 
@@ -108,6 +108,12 @@ namespace ApprovalApp.Application
             List<TicketApproval> tickets = await _ticketsRepository.GetActiveIncomingTicketsByIdApproving(approvingId);
 
             return tickets;
+        }
+
+        public async Task<TicketApproval> GetTicketApprovalAsync(long idTicket, long idApproving)
+        {
+            TicketApproval ticketApproval = await _ticketsRepository.GetTicketApprovalAsync(idTicket, idApproving);
+            return ticketApproval;
         }
     }
 }

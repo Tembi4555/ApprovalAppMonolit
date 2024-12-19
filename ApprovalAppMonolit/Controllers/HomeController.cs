@@ -1,3 +1,4 @@
+using ApprovalApp.Application.Helpers;
 using ApprovalApp.Domain.Abstractions;
 using ApprovalApp.Domain.Models;
 using ApprovalAppMonolit.Contracts;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text.Json.Serialization;
 
 namespace ApprovalAppMonolit.Controllers
@@ -91,7 +93,7 @@ namespace ApprovalAppMonolit.Controllers
             return Redirect(Url.Action("Index","Home"));
         }
 
-        public async Task<ActionResult> GetIncoming(long approvingId)
+        public async Task<IActionResult> GetIncoming(long approvingId)
         {
             List<TicketApproval> tickets = await _ticketsService.GetActiveIncomingTicketsByIdApproving(approvingId);
 
@@ -104,7 +106,7 @@ namespace ApprovalAppMonolit.Controllers
             return Json(response);
         }
 
-        public async Task<ActionResult> GetOutgoing(long idAuthor)
+        public async Task<IActionResult> GetOutgoing(long idAuthor)
         {
             List<Ticket> tickets = await _ticketsService.GetTicketsByIdAuthorAsync(idAuthor);
 
@@ -115,6 +117,73 @@ namespace ApprovalAppMonolit.Controllers
                 .ToList();
 
             return Json(response);
+        }
+
+        public async Task<IActionResult> GetTicketView(long idTicket, long? idApproving)
+        {
+            TicketViewModel ticketViewModel = null;
+
+            if(idApproving is null)
+            {
+                Ticket? ticket = await _ticketsService.GetTicketByIdAsync(idTicket);
+
+                if (ticket == null)
+                    return BadRequest($"Не удалось найти заявку по идентфикатору {idTicket}");
+
+                ticketViewModel = new TicketViewModel(id: ticket.Id, title: ticket.Title, description: ticket.Description,
+                    createDate: ticket.CreateDate.ToString("d"), 
+                    deadline: ticket.TicketApprovals?.OrderByDescending(t => t.Iteration).FirstOrDefault()?.Deadline?.ToString("d"),
+                    author: ticket?.AuthorPerson?.FullName, null, null);
+            }
+            else
+            {
+                TicketApproval ta = await _ticketsService.GetTicketApprovalAsync(idTicket, (long)idApproving);
+
+                if (ta == null)
+                    return BadRequest($"Не удалось найти заявку по идентфикатору {idTicket}");
+
+                ticketViewModel = new TicketViewModel(id: ta?.Ticket?.Id ?? -1, title: ta?.Ticket?.Title, description: ta?.Ticket?.Description,
+                    createDate: ta?.Ticket?.CreateDate.ToString("d"),
+                    deadline: ta?.Deadline?.ToString("d"),
+                    author: ta?.Ticket?.AuthorPerson?.FullName, ta?.ApprovingPerson?.FullName, ta?.Status);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest($"Не удалось найти заявку по идентфикатору {idTicket}");
+            }
+            else
+                return PartialView("Partial/_ApprovalTicket", ticketViewModel);
+        }
+
+        /// <summary>
+        /// Изменения статуса задачи по заявке согласующим.
+        /// </summary>
+        [HttpPut]
+        public async Task<IActionResult> ApprovingTicketTask(long idTicket, long idApproving, int idStatus, 
+            string? comment)
+        {
+            if (idStatus < 1 || idStatus > 5)
+                return BadRequest("Не верно указан статус согласование/отклонение.");
+
+            if (String.IsNullOrEmpty(comment))
+                return BadRequest("Не указан комментарий к задаче.");
+
+            string status = TicketHelpers.GetStatusString((StatusApproval)idStatus);
+
+            TicketApproval ticketUpdating = await _ticketsService.ApprovingTicketTask(idTicket, idApproving, status, comment);
+
+            if (ticketUpdating is null)
+                return BadRequest($"Не удалось изменить статус по задаче {idTicket}");
+
+            string idAuthorStr = ticketUpdating?.Ticket is not null ? ticketUpdating.Ticket.IdAuthor.ToString() : "-1";
+
+            string[] approversStr = { idAuthorStr };
+
+            await _hubContext.Clients.All
+                .SendAsync("ReceiveMessage", approversStr, $"Задача - {idTicket} получила статус \"{status}\".");
+
+            return Json("ok");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -76,7 +76,24 @@ namespace ApprovalApp.Data.TicketsRepository
             return tickets;
         }
 
-        public async Task<TicketApproval> GetTicketApprovalByIdTicketAndApproving(long idTicket, long idApproving)
+        public async Task<TicketApproval> GetTicketApprovalAsync(long idTicket, long idApproving)
+        {
+            TicketApprovalEntity tae = await _context.TicketsApprovals.AsNoTracking()
+                .Where(t => t.TicketId == idTicket 
+                && t.ApprovingPersonId == idApproving)
+                .Include(t => t.Ticket).ThenInclude (p => p!.Person)
+                .Include(p => p!.Person)
+                .OrderByDescending(t => t.Iteration).FirstOrDefaultAsync();
+
+            if (tae is null)
+                return null;
+
+            TicketApproval ticketApproval = tae.Mapping();
+
+            return ticketApproval;
+        }
+
+        public async Task<TicketApproval?> GetTicketApprovalByIdTicketAndApproving(long idTicket, long idApproving)
         {
             TicketApprovalEntity? tae = await _context.TicketsApprovals.AsNoTracking()
                 .Where(t => t.TicketId == idTicket

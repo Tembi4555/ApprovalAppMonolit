@@ -1,0 +1,47 @@
+﻿@model TicketViewModel
+
+<div class="container container-flex">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <h2 class="text-center mb-4">Согласование задачи ИД-@Model.Id</h2>
+            <form method="post" id="updateTicketForm">
+                    @Html.HiddenFor(model => model.Id)
+
+                    <div class="mb-3">
+                        <label for="Title" class="form-label">Название задачи</label>
+                        @Html.TextBoxFor(model => model.Title, new { @class = "form-control", @type = "text", @disabled = "disabled" })
+                    </div>
+                    <div class="mb-3">
+                        <label for="Description" class="form-label">Описание</label>
+                        @Html.TextBoxFor(model => model.Description, new { @class = "form-control", @type = "text", @disabled = "disabled" })
+                        <div class="error" id="DescriptionError"></div>
+                    </div>
+                <div class="row mb-3">
+                        <div class="form-group col-lg-6">
+                            @Html.Label("Срок выполнения")
+                            @Html.TextBoxFor(model => model.Deadline, new { @class = "form-control", @type = "text", @disabled = "disabled" })
+                        </div>
+                        <div class="form-group col-lg-6">
+                            @Html.Label("Автор поручения")
+                            @Html.TextBoxFor(model => model.Author,
+                                 new { @class = "form-control", @type = "text", @disabled = "disabled" })
+                        </div>
+                    </div>
+                <div class="row mb-3">
+                        <div class="form-group col-lg-9">
+                            <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Отчет по исполнению..."></textarea>
+                            <div class="error" id="CommentError"></div>
+                        </div>
+                        <div class="form-group col-lg-3">
+                            <select class="form-select" id="idStatus" name="idStatus" required>
+                                <option disabled selected value="">Выберите...</option>
+                                <option value="3">Согласовано</option>
+                                <option value="2">На доработку</option>
+                            </select>
+                        </div>
+                    </div>
+            </form>
+        </div>
+    </div>
+</div>
+

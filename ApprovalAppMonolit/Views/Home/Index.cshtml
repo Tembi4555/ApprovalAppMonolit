@@ -16,34 +16,57 @@
             <a class="nav-link" id="outgoing-tab" data-bs-toggle="tab" href="#outgoing" role="tab" aria-controls="outgoing" aria-selected="false">Исходящие задачи</a>
         </li>
         <li class="nav-item">
-            <a class="btn btn-primary" id="btn-create-task" href="@Url.Action("Create","Home")" type="button" aria-selected="false">+ Создать задачу</a>
+            <a class="btn btn-primary" id="btn-create-task" href="@Url.Action("Create","Home")" type="button" aria-selected="false"><i class="fa-solid fa-plus"></i> Создать задачу</a>
         </li>
     </ul>
     <hr />
     <div class="tab-content">
         <div class="tab-pane active" id="incoming">
-            <table 
-                id="incoming-table">
+            <table id="incoming-table"
+                   data-page-size="20"
+                   data-page-list="[20,50,100]"
+                   data-search="true"
+                   data-show-refresh="true"
+                   data-filter-control="true"
+                   data-buttons-class="primary"
+                   data-cache="false"
+                   data-pagination="true">
                 <thead>
                     <tr>
-                        <th data-field="id">№</th>
+                        <th data-field="id" data-sortable="true">ИД</th>
                         <th data-field="title">Тема</th>
                         <th data-field="description">Описание</th>
-                        <th data-field="deadline">Срок</th>
-                        <th data-field="createDate">Дата создания</th>
+                        <th data-field="deadline" data-sortable="true">Срок</th>
+                        <th data-field="createDate" data-sortable="true">Дата создания</th>
+                        @if (true)
+                        {
+                            <th data-formatter="formatterIncomming" data-events="operateEvents" data-align="center" data-valign="middle"></th>
+                        }
                     </tr>
                 </thead>
             </table>
         </div>
         <div class="tab-pane" id="outgoing">
-            <table id="outgoing-table">
+            <table id="outgoing-table"
+                   data-page-size="20"
+                   data-page-list="[20,50,100]"
+                   data-search="true"
+                   data-show-refresh="true"
+                   data-filter-control="true"
+                   data-buttons-class="primary"
+                   data-cache="false"
+                   data-pagination="true">
                 <thead>
                     <tr>
-                        <th data-field="id">№</th>
+                        <th data-field="id" data-sortable="true">№</th>
                         <th data-field="title">Тема</th>
                         <th data-field="description">Описание</th>
-                        <th data-field="deadline">Срок</th>
-                        <th data-field="createDate">Дата создания</th>
+                        <th data-field="deadline" data-sortable="true">Срок</th>
+                        <th data-field="createDate" data-sortable="true">Дата создания</th>
+                        @if (true)
+                        {
+                            <th data-formatter="formatterOutgoing" data-events="operateEvents" data-align="center" data-valign="middle"></th>
+                        }
                     </tr>
                 </thead>
             </table>
@@ -52,8 +75,34 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalForm" tabindex="-1" aria-labelledby="modalFormLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Здесь будет содержимое модального окна -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" onclick="saveChangeStatus()">Сохранить изменения</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .error {
+            color: red;
+            font-size: 0.875em;
+        }
+    </style>
+}
+
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+
     <script>
 
         const connection = new signalR.HubConnectionBuilder()
@@ -88,6 +137,10 @@
 
         var $incomingTable = $('#incoming-table')
         var $outgoingTable = null
+
+        window.operateEvents = {
+            'click .btnUpdateTask': function (e, value, row, index) { showUpdateForm(row['id']) },
+        };
         
          $(function () {
             createIncomingTable()
@@ -96,13 +149,36 @@
                 if (!$outgoingTable){
                     createOutgoingTable();
                 }
+                else
+                    updateOutgoingTable();
+                    
             });
 
             $("#incoming-tab").click(function () {
-                
+                updateIncomingTable();
             });
+
+            $incomingTable.on('refresh.bs.table',
+                function (params) {
+                    updateIncomingTable();
+                });
+             if ($outgoingTable) {
+                $outgoingTable.on('refresh.bs.table',
+                    function (params) {
+                        updateOutgoingTable();
+                    });
+             }
+            
             
         })
+
+        function formatterIncomming(value, row, index) {
+            return [
+                '<a class="btnUpdateTask" href="javascript:void(0)" title="Просмотреть задачу">',
+                'Просмотреть',
+                '</a>  '
+            ].join('');
+        }
 
         function createIncomingTable(){
             $.ajax({
@@ -159,6 +235,78 @@
                 });
             }
             
+        }
+
+        function showUpdateForm(idTask) {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("GetTicketView", "Home")/',
+                cache: false,
+                data: { idTicket: idTask, idApproving: "@personId" },
+                success: function (data) {
+                    $('#modalForm .modal-body').empty().append(data);
+                    $('#modalForm').modal('show');
+                },
+                error(event, jqXHR, options) {
+                    if (event.responseText.startsWith("Не удалось найти заявку")) {
+                        Toastify({
+                            text: event.responseText,
+                            duration: 3000, 
+                            close: true,     
+                            gravity: "top",  
+                            position: "right", 
+                            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
+                        }).showToast();
+                    }
+                    else {
+                        Toastify({
+                            text: "Не пришел ответ от сервера",
+                            duration: 3000,  
+                            close: true,    
+                            gravity: "top",  
+                            position: "right", 
+                            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
+                        }).showToast();
+                    }
+                    
+                }
+            });
+        }
+
+        function saveChangeStatus() {
+            var formData = $("#updateTicketForm").serialize();
+
+            $(".error").text("");
+            let isValid = true;
+
+            var comment = $('#myForm input[id="comment"]').val();
+
+            // Проверка на обязательность полей
+            if ($("#Title").val() === "") {
+                $("#taskTitleError").text("Название задачи обязательно.");
+                isValid = false;
+            }
+            if ($("#Description").val() === "") {
+                $("#taskDescriptionError").text("Описание обязательно.");
+                isValid = false;
+            }
+            if ($("#taskDeadline").val() === "") {
+                $("#taskDeadlineError").text("Срок выполнения обязателен.");
+                isValid = false;
+            }
+
+            if (!$('#detailsForm').valid()) return false;
+
+            $.ajax({
+                url: '@Url.Action("GetOutgoing", "Home")',
+                method: 'post',
+                dataType: 'html',
+                data: { idAuthor: @personId },
+                success: function (data) {
+                    var res = JSON.parse(data)
+                    $outgoingTable.bootstrapTable('load', res);
+                }
+            });
         }
 
         // Toastify({
