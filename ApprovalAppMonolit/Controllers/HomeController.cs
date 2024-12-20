@@ -186,6 +186,56 @@ namespace ApprovalAppMonolit.Controllers
             return Json("ok");
         }
 
+        public async Task<IActionResult> GetOutgoingDetails(long idTicket)
+        {
+            if(idTicket <= 0)
+                return BadRequest($"Неверно указан идентификатр заявки.");
+
+            Ticket ticket = await _ticketsService.GetTicketByIdAsync(idTicket);
+
+            if(ticket is null)
+                return BadRequest($"Не удалось найти заявку с идентификатором {idTicket}");
+
+            List<TicketViewModel> response = new();
+            if(ticket?.TicketApprovals is null || ticket?.TicketApprovals.Count() == 0)
+                return BadRequest($"В заявке {idTicket} нет ни одной задачи");
+
+            foreach (var ta in ticket?.TicketApprovals.OrderBy(t => t.Iteration).ThenBy(t => t.NumberQueue))
+            {
+                TicketViewModel tvm = new TicketViewModel(id: ticket.Id, title: ticket.Title, description: ticket.Description,
+                    createDate: ticket.CreateDate.ToString("d"), deadline: ta.Deadline?.ToString("d"),
+                    author: ticket?.AuthorPerson?.FullName, approving: ta?.ApprovingPerson?.FullName,
+                    status: ta.Status, commentByStatus: ta.Comment, modifiedDate: ta.ModifiedDate.ToString("d"));
+
+                response.Add(tvm);
+            }
+
+            return PartialView("Partial/_OutgoingTask", response);
+        }
+
+        /// <summary>
+        /// Прекращение заявки
+        /// </summary>
+        [HttpPut]
+        public async Task<ActionResult> StopApproval(long id, string? reason)
+        {
+            if (String.IsNullOrEmpty(reason))
+                return BadRequest("Требуется указать причину прекращения согласования заявки.");
+
+            var result = await _ticketsService.StopApprovalAsync(id, reason);
+
+            if (result.status != "ok")
+                return BadRequest(result.status);
+
+            string[] approversStr = result.ticketApprovals.Select(t => t.ApprovingPersonId.ToString()).ToArray();
+
+            await _hubContext.Clients.All
+                .SendAsync("ReceiveMessage", approversStr, $"Задача - {id} прекращена автором.");
+
+            return Json("ok");
+
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

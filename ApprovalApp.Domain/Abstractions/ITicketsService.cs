@@ -20,7 +20,7 @@ namespace ApprovalApp.Domain.Abstractions
         /// <summary>
         /// Прекращение согласования заявки.
         /// </summary>
-        Task<string> StopApprovalAsync(long ticketId, string? reasonStopping);
+        Task<(List<TicketApproval> ticketApprovals, string status)> StopApprovalAsync(long ticketId, string? reasonStopping);
 
         /// <summary>
         /// Получить заявку по идентификатору

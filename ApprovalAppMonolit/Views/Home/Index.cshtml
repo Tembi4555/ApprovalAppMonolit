@@ -139,7 +139,8 @@
         var $outgoingTable = null
 
         window.operateEvents = {
-            'click .btnUpdateTask': function (e, value, row, index) { showUpdateForm(row['id']) },
+            'click .btnUpdateTask': function (e, value, row, index) { showUpdateForm(row['id'], '@Url.Action("GetTicketView", "Home")/') },
+            'click .btnUpdateOutgoingTask': function (e, value, row, index) { showUpdateForm(row['id'], '@Url.Action("GetOutgoingDetails", "Home")/', true) },
         };
         
          $(function () {
@@ -241,15 +242,23 @@
             
         }
 
-        function showUpdateForm(idTask) {
+        function showUpdateForm(idTask, url, change) {
             $.ajax({
                 type: "GET",
-                url: '@Url.Action("GetTicketView", "Home")/',
+                url: url,
                 cache: false,
                 data: { idTicket: idTask, idApproving: "@personId" },
                 success: function (data) {
                     $('#modalForm .modal-body').empty().append(data);
                     $('#modalForm').modal('show');
+                    if (change) {
+                        changeFooter(idTask, 1);
+                    }
+                    else
+                    {
+                        changeFooter(idTask, 2);
+                    }
+                        
                 },
                 error(event, jqXHR, options) {
                     if (event.responseText && event.responseText.startsWith("Не удалось найти заявку")) {
@@ -273,6 +282,56 @@
                         }).showToast();
                     }
                     
+                }
+            });
+        }
+
+        function changeFooter(ticketId,numberChange) {
+            if (numberChange === 1) { 
+                $('#modalForm .modal-footer').html(`
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-danger" onclick="stopTicket(${ticketId})">Прекратить задачу</button>
+                `);
+            }
+            else{
+                $('#modalForm .modal-footer').html(`
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" onclick="saveChangeStatus()">Сохранить изменения</button>
+                `);
+            }
+            
+        }
+
+        function stopTicket(ticketId) {
+            $.ajax({
+                url: '@Url.Action("StopApproval", "Home")',
+                method: 'PUT',
+                dataType: 'json',
+                data: { id: ticketId, reason: "Прекращена автором"},
+                success: function (data) {
+                    if (data === 'ok') {
+                        $('#modalForm').modal('hide');
+                        updateOutgoingTable()
+                        Toastify({
+                            text: "Задача прекращена.",
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
+                        }).showToast();
+                    }
+
+                },
+                error(event, jqXHR, options) {
+                    Toastify({
+                        text: "Не пришел ответ от сервера",
+                        duration: 3000,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "red"
+                    }).showToast();
                 }
             });
         }
@@ -313,7 +372,7 @@
                 url: '@Url.Action("ApprovingTicketTask", "Home")',
                 method: 'PUT',
                 dataType: 'json',
-                data: { idTicket: idTicket, idApproving: @personId, idStatus: status, comment: comment },
+                data: { idTicket: idTicket, idApproving: '@personId', idStatus: status, comment: comment },
                 success: function (data) {
                     if (data === 'ok') {
                         $('#modalForm').modal('hide');

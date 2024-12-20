@@ -6,7 +6,8 @@ namespace ApprovalAppMonolit.Models
     {
         public TicketViewModel(long id, string? title, string? description,
             string? createDate, string? deadline, string? author, 
-            string? approving, string? status, string? commentByStatus = null)
+            string? approving, string? status, string? commentByStatus = null, 
+            string? modifiedDate = null)
         {
             Id = id;
             Title = title;
@@ -17,6 +18,7 @@ namespace ApprovalAppMonolit.Models
             Approving = approving;
             Status = status;
             CommentByStatus = commentByStatus;
+            ModifiedDate = modifiedDate;
         }
 
         public long Id { get; set; }
@@ -28,6 +30,7 @@ namespace ApprovalAppMonolit.Models
         }
         public string? CreateDate { get; set; }
         public string? Deadline { get; set; }
+        public string? ModifiedDate { get; set; }
         public string? Author { get; set; }
         public string? Approving {  get; set; }
         public string? Status { get; set; }

@@ -118,7 +118,8 @@ namespace ApprovalApp.Data.TicketsRepository
             {
                 ticketEntity = await _context.Tickets.AsNoTracking()
                     .Where(t => t.Id == ticketId)
-                    .Include(t => t.TicketApprovalEntities)
+                    .Include(t => t.TicketApprovalEntities).ThenInclude(t => t.Person)
+                    .Include(p => p.Person)
                     .FirstOrDefaultAsync();
             }
             catch (Exception ex)
@@ -135,10 +136,7 @@ namespace ApprovalApp.Data.TicketsRepository
 
             foreach(var ta in ticketEntity.TicketApprovalEntities)
             {
-                ticketApprovals.Add(TicketApproval
-                    .Create(id: ta.Id, ticketId:ta.TicketId, approvingPersonId: ta.ApprovingPersonId,
-                        status: ta.Status, iteration: ta.Iteration, numberQueue: ta.NumberQueue, 
-                        comment: ta.Comment, deadline: ta.Deadline).TicketApproval);
+                ticketApprovals.Add(ta.Mapping());
             }
 
             Ticket ticket = Ticket.Create(id: ticketEntity.Id, title: ticketEntity.Title, description: ticketEntity.Description,

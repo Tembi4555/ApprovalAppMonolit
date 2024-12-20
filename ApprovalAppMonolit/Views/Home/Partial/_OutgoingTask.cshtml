@@ -1,0 +1,33 @@
+﻿@model List<TicketViewModel>
+@{
+    int countComment = 1;
+}
+
+<div class="container container-flex">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <h2 class="text-center mb-4">История согласования задачи ИД-@Model.FirstOrDefault().Id</h2>
+            <h4 class="text-center mb-4">Тема: @Model.FirstOrDefault().Title</h4>
+            <form method="post" id="outgoingTicketForm">
+                <ul class="list-group mb-4">
+                @foreach(var item in Model)
+                {
+                    <li class="list-group-item">
+                        <div>
+                            <strong>Согласующий:</strong> @item.Approving |
+                            <strong>Дата изменения:</strong> @item.ModifiedDate |
+                            <strong>Статус:</strong> @item.Status
+                            <a href"#" class="btn btn-link btn-sm float-end" data-bs-toggle="collapse" data-bs-target="#comment-@countComment">Показать комментарий</a>
+                        </div>
+                        <div id="comment-@countComment" class="collapse mt-2">
+                            <h6><strong>Комментарий согласующего:</strong></h6>
+                            <p>@item.CommentByStatus</p>
+                        </div>
+                    </li>
+                    countComment++;
+                }
+                </ul>
+            </form>
+        </div>
+    </div>
+</div>

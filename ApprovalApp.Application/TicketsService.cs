@@ -24,23 +24,23 @@ namespace ApprovalApp.Application
             return ticketId;
         }
 
-        public async Task<string> StopApprovalAsync(long ticketId, string? reasonStopping)
+        public async Task<(List<TicketApproval> ticketApprovals, string status)> StopApprovalAsync(long ticketId, string? reasonStopping)
         {
             Ticket ticket = await GetTicketByIdAsync(ticketId);
 
             if (ticket == null) 
             { 
-                return $"По идентификатору - {ticketId} не найдена заявка.";
+                return (null, $"По идентификатору - {ticketId} не найдена заявка.");
             }
 
             if(ticket.TicketApprovals == null || ticket.TicketApprovals.Count() == 0)
             {
-                return $"Для заявкм {ticketId} не найдены очереди согласования";
+                return (null, $"Для заявкм {ticketId} не найдены очереди согласования");
             }
 
             if(ticket.TicketApprovals?.LastOrDefault()?.Status == "Прекращено")
             {
-                return $"Для заявки {ticketId} уже установлен статус \"Прекращено\"";
+                return (null, $"Для заявки {ticketId} уже установлен статус \"Прекращено\"");
             }
 
 
@@ -52,9 +52,9 @@ namespace ApprovalApp.Application
             string statusOperation = await UpdateTicketWithTicketsApprovalAsync(ticket);
 
             if(statusOperation != "ok")
-                return statusOperation;
+                return (null, statusOperation);
 
-            return "ok";
+            return (ticket.TicketApprovals, "ok");
         }
 
         public async Task<Ticket> GetTicketByIdAsync(long ticketId)
