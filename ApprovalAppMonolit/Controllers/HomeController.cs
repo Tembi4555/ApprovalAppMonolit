@@ -113,7 +113,7 @@ namespace ApprovalAppMonolit.Controllers
             List<TicketViewModel> response = tickets
                 .Select(t => new TicketViewModel(t.Id, t.Title, t.Description,
                  t.CreateDate.ToString("d"), t.TicketApprovals?.LastOrDefault()?.Deadline?.ToString("d"),
-                 t.AuthorPerson?.FullName, "", t.TicketApprovals?.LastOrDefault()?.Status))
+                 t.AuthorPerson?.FullName, "", t.GeneralStatus))
                 .ToList();
 
             return Json(response);
