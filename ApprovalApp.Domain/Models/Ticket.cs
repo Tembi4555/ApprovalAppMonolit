@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -40,7 +41,7 @@ namespace ApprovalApp.Domain.Models
 
         public List<TicketApproval>? TicketApprovals { get; }
 
-        public string? GeneralStatus { get; }
+        public string? GeneralStatus { get; private set; }
 
         public static (Ticket Ticket, string? Error) Create (long id, string? title, string? description, 
             long idAuthor, List<TicketApproval>? ticketApprovals = null, Person? authorPerson = null, 
@@ -87,6 +88,11 @@ namespace ApprovalApp.Domain.Models
             Ticket ticket = new Ticket(id, title, description, (DateTime)createDate, idAuthor, ticketApprovals, authorPerson, generalStatus);
 
             return (ticket,  error);
+        }
+
+        public void UpdateGeneralStatus(List<TicketApproval>? ticketApprovals)
+        {
+            this.GeneralStatus = DomainHelpers.GetGeneralStatus(ticketApprovals);
         }
     }
 }

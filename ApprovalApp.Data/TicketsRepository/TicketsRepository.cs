@@ -168,9 +168,12 @@ namespace ApprovalApp.Data.TicketsRepository
                     ticketApprovals.Add(ta.Mapping());
                 }
 
-                var tas = tickets.FirstOrDefault(t => t.Id == ticketEntity.Id)?.TicketApprovals;
 
-                tas?.AddRange(ticketApprovals);
+                var tas = tickets.FirstOrDefault(t => t.Id == ticketEntity.Id);
+
+                tas?.TicketApprovals?.AddRange(ticketApprovals);
+
+                tas?.UpdateGeneralStatus(ticketApprovals);
 
                 ticketApprovals.Clear();
             }

@@ -180,6 +180,14 @@
             ].join('');
         }
 
+        function formatterOutgoing(value, row, index) {
+            return [
+                '<a class="btnUpdateOutgoingTask" href="javascript:void(0)" title="Просмотреть задачу">',
+                '' + row["status"] + '',
+                '</a>  '
+            ].join('');
+        }
+
         function createIncomingTable(){
             $.ajax({
                 url: '@Url.Action("GetIncoming", "Home")',
