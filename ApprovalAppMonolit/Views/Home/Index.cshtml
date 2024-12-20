@@ -307,7 +307,7 @@
 
             $.ajax({
                 url: '@Url.Action("ApprovingTicketTask", "Home")',
-                method: 'post',
+                method: 'PUT',
                 dataType: 'html',
                 data: { idTicket: idTicket, idApproving: @personId, idStatus: status, comment: comment },
                 success: function (data) {
