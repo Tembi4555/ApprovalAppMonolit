@@ -32,8 +32,7 @@ builder.Services.AddScoped<ITicketsService, TicketsService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUsersRepository, UsersRepository>();
 
-//builder.WebHost.UseUrls("http://*:80");
-builder.WebHost.UseUrls("http://*:5555");
+builder.WebHost.UseUrls("http://*:80");
 
 var app = builder.Build();
 

@@ -319,7 +319,9 @@
                 dataType: 'html',
                 data: { idTicket: idTicket, idApproving: @personId, idStatus: status, comment: comment },
                 success: function (data) {
-                    if (data === 'ok') {
+                    var res = JSON.parse(data)
+                    if (res === 'ok') {
+                        $('#modalForm').modal('hide');
                         $incomingTable.bootstrapTable('load', res);
                         Toastify({
                             text: "Задача выполнена.",

@@ -66,7 +66,7 @@ namespace ApprovalApp.Data.TicketsRepository
         {
             List<TicketApprovalEntity> ticketsApprovalEntities = await _context.TicketsApprovals.AsNoTracking()
                 .Where(t => t.ApprovingPersonId == approvingId 
-                    && (t.Status == "Новая" || t.Status == "На доработку"))
+                    && (t.Status == "Новая" || t.Status == "Повторно"))
                 .Include(t => t.Ticket).ThenInclude(p => p!.Person)
                 .Include(p => p.Person)
                 .ToListAsync();
