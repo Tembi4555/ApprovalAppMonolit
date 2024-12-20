@@ -30,7 +30,7 @@
                 <div class="row mb-3">
                         <div class="form-group col-lg-9">
                             <textarea class="form-control" id="comment" name="comment" rows="3" placeholder="Отчет по исполнению..."></textarea>
-                            <div class="error" id="CommentError"></div>
+                            <div class="error" id="approvalCommentError"></div>
                         </div>
                         <div class="form-group col-lg-3">
                             <select class="form-select" id="idStatus" name="idStatus" required>
@@ -38,6 +38,7 @@
                                 <option value="3">Согласовано</option>
                                 <option value="2">На доработку</option>
                             </select>
+                            <div class="error" id="approvalStatusError"></div>
                         </div>
                     </div>
             </form>

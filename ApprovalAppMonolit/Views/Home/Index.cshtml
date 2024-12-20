@@ -248,14 +248,14 @@
                     $('#modalForm').modal('show');
                 },
                 error(event, jqXHR, options) {
-                    if (event.responseText.startsWith("Не удалось найти заявку")) {
+                    if (event.responseText && event.responseText.startsWith("Не удалось найти заявку")) {
                         Toastify({
                             text: event.responseText,
                             duration: 3000, 
                             close: true,     
                             gravity: "top",  
                             position: "right", 
-                            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
+                            backgroundColor: "red"
                         }).showToast();
                     }
                     else {
@@ -265,7 +265,7 @@
                             close: true,    
                             gravity: "top",  
                             position: "right", 
-                            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
+                            backgroundColor: "red"
                         }).showToast();
                     }
                     
@@ -274,37 +274,65 @@
         }
 
         function saveChangeStatus() {
-            var formData = $("#updateTicketForm").serialize();
+            var formData = $("#updateTicketForm").serializeArray();
+
+            var formValues = {};
+            $.each(formData, function (index, element) {
+                formValues[element.name] = element.value;
+            });
 
             $(".error").text("");
             let isValid = true;
 
-            var comment = $('#myForm input[id="comment"]').val();
-
+            var comment = formValues.comment
+            var status = formValues.idStatus;
+            var idTicket = formValues.Id;
+            var personId = '@personIdString';
             // Проверка на обязательность полей
-            if ($("#Title").val() === "") {
-                $("#taskTitleError").text("Название задачи обязательно.");
+            if (comment === "") {
+                $("#approvalCommentError").text("Заполнение отчета обязательно.");
                 isValid = false;
             }
-            if ($("#Description").val() === "") {
-                $("#taskDescriptionError").text("Описание обязательно.");
+            if (!status) {
+                $("#approvalStatusError").text("Вы не выбрали статус согласования задачи.");
                 isValid = false;
             }
-            if ($("#taskDeadline").val() === "") {
-                $("#taskDeadlineError").text("Срок выполнения обязателен.");
+            if (!idTicket || !personId)
+            {
                 isValid = false;
+                alert('Ошибка на форме');
             }
 
-            if (!$('#detailsForm').valid()) return false;
+            if (!isValid) return false;
 
             $.ajax({
-                url: '@Url.Action("GetOutgoing", "Home")',
+                url: '@Url.Action("ApprovingTicketTask", "Home")',
                 method: 'post',
                 dataType: 'html',
-                data: { idAuthor: @personId },
+                data: { idTicket: idTicket, idApproving: @personId, idStatus: status, comment: comment },
                 success: function (data) {
-                    var res = JSON.parse(data)
-                    $outgoingTable.bootstrapTable('load', res);
+                    if (data === 'ok') {
+                        $incomingTable.bootstrapTable('load', res);
+                        Toastify({
+                            text: "Задача выполнена.",
+                            duration: 3000,  
+                            close: true,     
+                            gravity: "top",  
+                            position: "right", 
+                            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
+                        }).showToast();
+                    }
+
+                },
+                error(event, jqXHR, options) {
+                    Toastify({
+                        text: "Не пришел ответ от сервера",
+                        duration: 3000,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "red"
+                    }).showToast();
                 }
             });
         }

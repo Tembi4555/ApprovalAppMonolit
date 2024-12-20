@@ -123,7 +123,7 @@ namespace ApprovalAppMonolit.Controllers
         {
             TicketViewModel ticketViewModel = null;
 
-            if(idApproving is null)
+            if (idApproving is null)
             {
                 Ticket? ticket = await _ticketsService.GetTicketByIdAsync(idTicket);
 
