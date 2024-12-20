@@ -82,7 +82,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
             </div>
             <div class="modal-body">
-                <!-- Здесь будет содержимое модального окна -->
+                
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
@@ -191,12 +191,11 @@
         function createIncomingTable(){
             $.ajax({
                 url: '@Url.Action("GetIncoming", "Home")',
-                method: 'post',
-                dataType: 'html',
-                data: { approvingId: @personId },
+                method: 'GET',
+                dataType: 'json',
+                data: { approvingId: '@personId' },
                 success: function (data) {
-                    var res = JSON.parse(data)
-                    $incomingTable.bootstrapTable({ data: res });
+                    $incomingTable.bootstrapTable({ data: data });
                 }
             });
         }
@@ -205,12 +204,11 @@
         {
             $.ajax({
                 url: '@Url.Action("GetIncoming", "Home")',
-                method: 'post',
-                dataType: 'html',
-                data: { approvingId: @personId },
+                method: 'GET',
+                dataType: 'json',
+                data: { approvingId: '@personId' },
                 success: function (data) {
-                    var res = JSON.parse(data)
-                    $incomingTable.bootstrapTable( 'load', res );
+                    $incomingTable.bootstrapTable( 'load', data );
                 }
             });
         }
@@ -219,12 +217,11 @@
             $outgoingTable = $('#outgoing-table')
             $.ajax({
                 url: '@Url.Action("GetOutgoing", "Home")',
-                method: 'post',
-                dataType: 'html',
-                data: { idAuthor: @personId },
+                method: 'GET',
+                dataType: 'json',
+                data: { idAuthor: '@personId' },
                 success: function (data) {
-                    var res = JSON.parse(data)
-                    $outgoingTable.bootstrapTable({ data: res });
+                    $outgoingTable.bootstrapTable({ data: data });
                 }
             });
         }
@@ -233,12 +230,11 @@
             if ($outgoingTable) {
                 $.ajax({
                     url: '@Url.Action("GetOutgoing", "Home")',
-                    method: 'post',
-                    dataType: 'html',
-                    data: { idAuthor: @personId },
+                    method: 'GET',
+                    dataType: 'json',
+                    data: { idAuthor: '@personId' },
                     success: function (data) {
-                        var res = JSON.parse(data)
-                        $outgoingTable.bootstrapTable('load', res);
+                        $outgoingTable.bootstrapTable('load', data);
                     }
                 });
             }
@@ -316,13 +312,12 @@
             $.ajax({
                 url: '@Url.Action("ApprovingTicketTask", "Home")',
                 method: 'PUT',
-                dataType: 'html',
+                dataType: 'json',
                 data: { idTicket: idTicket, idApproving: @personId, idStatus: status, comment: comment },
                 success: function (data) {
-                    var res = JSON.parse(data)
-                    if (res === 'ok') {
+                    if (data === 'ok') {
                         $('#modalForm').modal('hide');
-                        $incomingTable.bootstrapTable('load', res);
+                        updateIncomingTable();
                         Toastify({
                             text: "Задача выполнена.",
                             duration: 3000,  
@@ -346,15 +341,6 @@
                 }
             });
         }
-
-        // Toastify({
-        //     text: "Это уведомление!",
-        //     duration: 3000,  // Время в миллисекундах
-        //     close: true,     // Кнопка для закрытия
-        //     gravity: "top",  // Положение: top или bottom
-        //     position: "right", // Положение: left, center, right
-        //     backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)"
-        // }).showToast();
 
     </script>
 }
