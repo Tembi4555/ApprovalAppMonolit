@@ -72,7 +72,7 @@ namespace ApprovalAppMonolit.Controllers
 
             if (approvers_select.Length == 0)
             {
-                return BadRequest("Не назначены согласующие заявку.");
+                return BadRequest("РќРµ РЅР°Р·РЅР°С‡РµРЅС‹ СЃРѕРіР»Р°СЃСѓСЋС‰РёРµ Р·Р°СЏРІРєСѓ.");
             }
 
             Dictionary<long, int> approvingInQueue = new Dictionary<long, int>();
@@ -89,7 +89,7 @@ namespace ApprovalAppMonolit.Controllers
 
             string[] approversStr = approvers_select.Select(a => a.ToString()).ToArray();
 
-            await _hubContext.Clients.All.SendAsync("ReceiveMessage", approversStr, "Вам поставлена новая задача для согласования");
+            await _hubContext.Clients.All.SendAsync("ReceiveMessage", approversStr, "\"Р’Р°Рј РїРѕСЃС‚Р°РІР»РµРЅР° РЅРѕРІР°СЏ Р·Р°РґР°С‡Р° РґР»СЏ СЃРѕРіР»Р°СЃРѕРІР°РЅРёСЏ\"");
 
             return Redirect(Url.Action("Index","Home"));
         }
@@ -129,7 +129,7 @@ namespace ApprovalAppMonolit.Controllers
                 Ticket? ticket = await _ticketsService.GetTicketByIdAsync(idTicket);
 
                 if (ticket == null)
-                    return BadRequest($"Не удалось найти заявку по идентфикатору {idTicket}");
+                    return BadRequest($"РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё Р·Р°СЏРІРєСѓ РїРѕ РёРґРµРЅС‚С„РёРєР°С‚РѕСЂСѓ {idTicket}");
 
                 ticketViewModel = new TicketViewModel(id: ticket.Id, title: ticket.Title, description: ticket.Description,
                     createDate: ticket.CreateDate.ToString("d"), 
@@ -141,7 +141,7 @@ namespace ApprovalAppMonolit.Controllers
                 TicketApproval ta = await _ticketsService.GetTicketApprovalAsync(idTicket, (long)idApproving);
 
                 if (ta == null)
-                    return BadRequest($"Не удалось найти заявку по идентфикатору {idTicket}");
+                    return BadRequest($"РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё Р·Р°СЏРІРєСѓ РїРѕ РёРґРµРЅС‚С„РёРєР°С‚РѕСЂСѓ {idTicket}");
 
                 ticketViewModel = new TicketViewModel(id: ta?.Ticket?.Id ?? -1, title: ta?.Ticket?.Title, description: ta?.Ticket?.Description,
                     createDate: ta?.Ticket?.CreateDate.ToString("d"),
@@ -151,37 +151,37 @@ namespace ApprovalAppMonolit.Controllers
 
             if (!ModelState.IsValid)
             {
-                return BadRequest($"Не удалось найти заявку по идентфикатору {idTicket}");
+                return BadRequest($"РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё Р·Р°СЏРІРєСѓ РїРѕ РёРґРµРЅС‚С„РёРєР°С‚РѕСЂСѓ {idTicket}");
             }
             else
                 return PartialView("Partial/_ApprovalTicket", ticketViewModel);
         }
 
         /// <summary>
-        /// Изменения статуса задачи по заявке согласующим.
+        /// РР·РјРµРЅРµРЅРёСЏ СЃС‚Р°С‚СѓСЃР° Р·Р°РґР°С‡Рё РїРѕ Р·Р°СЏРІРєРµ СЃРѕРіР»Р°СЃСѓСЋС‰РёРј.
         /// </summary>
         [HttpPut]
         public async Task<IActionResult> ApprovingTicketTask(long idTicket, long idApproving, int idStatus, 
             string? comment)
         {
             if (idStatus < 1 || idStatus > 5)
-                return BadRequest("Не верно указан статус согласование/отклонение.");
+                return BadRequest("РќРµ РІРµСЂРЅРѕ СѓРєР°Р·Р°РЅ СЃС‚Р°С‚СѓСЃ СЃРѕРіР»Р°СЃРѕРІР°РЅРёРµ/РѕС‚РєР»РѕРЅРµРЅРёРµ.");
 
             if (String.IsNullOrEmpty(comment))
-                return BadRequest("Не указан комментарий к задаче.");
+                return BadRequest("РќРµ СѓРєР°Р·Р°РЅ РєРѕРјРјРµРЅС‚Р°СЂРёР№ Рє Р·Р°РґР°С‡Рµ.");
 
             string status = TicketHelpers.GetStatusString((StatusApproval)idStatus);
 
             TicketApproval ticketUpdating = await _ticketsService.ApprovingTicketTask(idTicket, idApproving, status, comment);
 
             if (ticketUpdating is null)
-                return BadRequest($"Не удалось изменить статус по задаче {idTicket}");
+                return BadRequest($"РќРµ СѓРґР°Р»РѕСЃСЊ РёР·РјРµРЅРёС‚СЊ СЃС‚Р°С‚СѓСЃ РїРѕ Р·Р°РґР°С‡Рµ {idTicket}");
 
             string idAuthorStr = ticketUpdating?.Ticket is not null ? ticketUpdating.Ticket.IdAuthor.ToString() : "-1";
 
             string[] approversStr = { idAuthorStr };
 
-            var message = Encoding.UTF8.GetString(Encoding.UTF8.GetBytes($"Задача - {idTicket} получила статус \"{status}\"."));
+            var message = Encoding.UTF8.GetString(Encoding.UTF8.GetBytes($"Р—Р°РґР°С‡Р° - {idTicket} РїРѕР»СѓС‡РёР»Р° СЃС‚Р°С‚СѓСЃ \"{status}\"."));
 
             Response.ContentType = "application/json; charset=utf-8";
 
@@ -194,16 +194,16 @@ namespace ApprovalAppMonolit.Controllers
         public async Task<IActionResult> GetOutgoingDetails(long idTicket)
         {
             if(idTicket <= 0)
-                return BadRequest($"Неверно указан идентификатр заявки.");
+                return BadRequest($"РќРµРІРµСЂРЅРѕ СѓРєР°Р·Р°РЅ РёРґРµРЅС‚РёС„РёРєР°С‚СЂ Р·Р°СЏРІРєРё.");
 
             Ticket ticket = await _ticketsService.GetTicketByIdAsync(idTicket);
 
             if(ticket is null)
-                return BadRequest($"Не удалось найти заявку с идентификатором {idTicket}");
+                return BadRequest($"РќРµ СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё Р·Р°СЏРІРєСѓ СЃ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРј {idTicket}");
 
             List<TicketViewModel> response = new();
             if(ticket?.TicketApprovals is null || ticket?.TicketApprovals.Count() == 0)
-                return BadRequest($"В заявке {idTicket} нет ни одной задачи");
+                return BadRequest($"Р’ Р·Р°СЏРІРєРµ {idTicket} РЅРµС‚ РЅРё РѕРґРЅРѕР№ Р·Р°РґР°С‡Рё");
 
             foreach (var ta in ticket?.TicketApprovals.OrderBy(t => t.Iteration).ThenBy(t => t.NumberQueue))
             {
@@ -219,13 +219,13 @@ namespace ApprovalAppMonolit.Controllers
         }
 
         /// <summary>
-        /// Прекращение заявки
+        /// РџСЂРµРєСЂР°С‰РµРЅРёРµ Р·Р°СЏРІРєРё
         /// </summary>
         [HttpPut]
         public async Task<ActionResult> StopApproval(long id, string? reason)
         {
             if (String.IsNullOrEmpty(reason))
-                return BadRequest("Требуется указать причину прекращения согласования заявки.");
+                return BadRequest("РўСЂРµР±СѓРµС‚СЃСЏ СѓРєР°Р·Р°С‚СЊ РїСЂРёС‡РёРЅСѓ РїСЂРµРєСЂР°С‰РµРЅРёСЏ СЃРѕРіР»Р°СЃРѕРІР°РЅРёСЏ Р·Р°СЏРІРєРё.");
 
             var result = await _ticketsService.StopApprovalAsync(id, reason);
 
@@ -235,7 +235,7 @@ namespace ApprovalAppMonolit.Controllers
             string[] approversStr = result.ticketApprovals.Select(t => t.ApprovingPersonId.ToString()).ToArray();
 
             await _hubContext.Clients.All
-                .SendAsync("ReceiveMessage", approversStr, $"Задача - {id} прекращена автором.");
+                .SendAsync("ReceiveMessage", approversStr, $"Р—Р°РґР°С‡Р° - {id} РїСЂРµРєСЂР°С‰РµРЅР° Р°РІС‚РѕСЂРѕРј.");
 
             return Json("ok");
 
