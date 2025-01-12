@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace ApprovalAppMonolit.Controllers
@@ -180,8 +181,12 @@ namespace ApprovalAppMonolit.Controllers
 
             string[] approversStr = { idAuthorStr };
 
+            var message = Encoding.UTF8.GetString(Encoding.UTF8.GetBytes($"Задача - {idTicket} получила статус \"{status}\"."));
+
+            Response.ContentType = "application/json; charset=utf-8";
+
             await _hubContext.Clients.All
-                .SendAsync("ReceiveMessage", approversStr, $"Задача - {idTicket} получила статус \"{status}\".");
+                .SendAsync("ReceiveMessage", approversStr, message);
 
             return Json("ok");
         }
