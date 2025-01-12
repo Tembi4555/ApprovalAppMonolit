@@ -1,9 +1,15 @@
 services:
   approvalappmonolit:
     image: ${DOCKER_REGISTRY-}approvalappmonolit
+    volumes:
+      - ./ApprovalAppMonolit/Approval.db:/app/Approval.db:rw
     build:
       context: .
       dockerfile: ApprovalAppMonolit/Dockerfile
+    command: /bin/bash -c "apt-get update && apt-get install -y locales && locale-gen ru_RU.UTF-8 && update-locale LANG=ru_RU.UTF-8 && update-locale LC_ALL=ru_RU.UTF-8 && dotnet ApprovalAppMonolit.dll"
+    environment:
+      - LANG=ru_RU.UTF-8
+      - LC_ALL=ru_RU.UTF-8
     ports:
       - "5005:80" 
     networks:

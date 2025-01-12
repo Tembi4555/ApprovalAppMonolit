@@ -7,6 +7,7 @@ using ApprovalApp.Domain.Abstractions;
 using ApprovalAppMonolit.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options => options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Login/Login"));
 builder.Services.AddAuthorization();
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR().AddNewtonsoftJsonProtocol(options =>
+{
+    options.PayloadSerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver();
+    options.PayloadSerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+    options.PayloadSerializerSettings.StringEscapeHandling = Newtonsoft.Json.StringEscapeHandling.Default;
+}); ;
 
 builder.Services.AddScoped<IPersonsService, PersonsService>();
 builder.Services.AddScoped<IPersonsPerository, PersonsRepository>();
@@ -36,7 +42,10 @@ builder.WebHost.UseUrls("http://*:80");
 
 var app = builder.Build();
 
-app.MapHub<AppHub>("/channel");
+app.MapHub<AppHub>("/channel", options =>
+{
+    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
